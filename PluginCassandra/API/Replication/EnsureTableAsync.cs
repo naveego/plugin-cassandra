@@ -1,11 +1,10 @@
 using System.Text;
 using System.Threading.Tasks;
-using Naveego.Sdk.Plugins;
-using PluginMySQL.API.Factory;
-using PluginMySQL.DataContracts;
-using PluginMySQL.Helper;
+using PluginCassandra.API.Factory;
+using PluginCassandra.DataContracts;
+using PluginCassandra.Helper;
 
-namespace PluginMySQL.API.Replication
+namespace PluginCassandra.API.Replication
 {
     public static partial class Replication
     {

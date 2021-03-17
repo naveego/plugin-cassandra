@@ -1,11 +1,10 @@
 using System;
 using System.IO;
-using System.Threading;
 using Grpc.Core;
 using Naveego.Sdk.Plugins;
 using Serilog;
 
-namespace PluginMySQL.Helper
+namespace PluginCassandra.Helper
 {
     public static class Logger
     {

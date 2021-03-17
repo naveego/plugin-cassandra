@@ -1,6 +1,6 @@
 using Naveego.Sdk.Plugins;
 
-namespace PluginMySQL.Helper
+namespace PluginCassandra.Helper
 {
     public class ServerStatus
     {

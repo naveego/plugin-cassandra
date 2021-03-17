@@ -1,4 +1,4 @@
-namespace PluginMySQL.DataContracts
+namespace PluginCassandra.DataContracts
 {
     public class ReplicationColumn
     {

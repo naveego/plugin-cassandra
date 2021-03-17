@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using Naveego.Sdk.Plugins;
 using Newtonsoft.Json;
-using PluginMySQL.DataContracts;
-using PluginMySQL.Helper;
+using PluginCassandra.DataContracts;
+using PluginCassandra.Helper;
 using Xunit;
 using Record = Naveego.Sdk.Plugins.Record;
 
-namespace PluginMySQLTest.Plugin
+namespace PluginCassandraTest.Plugin
 {
     public class PluginIntegrationTest
     {
@@ -69,7 +69,7 @@ namespace PluginMySQLTest.Plugin
             // setup
             Server server = new Server
             {
-                Services = {Publisher.BindService(new PluginMySQL.Plugin.Plugin())},
+                Services = {Publisher.BindService(new PluginCassandra.Plugin.Plugin())},
                 Ports = {new ServerPort("localhost", 0, ServerCredentials.Insecure)}
             };
             server.Start();
@@ -107,7 +107,7 @@ namespace PluginMySQLTest.Plugin
             // setup
             Server server = new Server
             {
-                Services = {Publisher.BindService(new PluginMySQL.Plugin.Plugin())},
+                Services = {Publisher.BindService(new PluginCassandra.Plugin.Plugin())},
                 Ports = {new ServerPort("localhost", 0, ServerCredentials.Insecure)}
             };
             server.Start();
@@ -139,7 +139,7 @@ namespace PluginMySQLTest.Plugin
             // setup
             Server server = new Server
             {
-                Services = {Publisher.BindService(new PluginMySQL.Plugin.Plugin())},
+                Services = {Publisher.BindService(new PluginCassandra.Plugin.Plugin())},
                 Ports = {new ServerPort("localhost", 0, ServerCredentials.Insecure)}
             };
             server.Start();
@@ -191,7 +191,7 @@ namespace PluginMySQLTest.Plugin
             // setup
             Server server = new Server
             {
-                Services = {Publisher.BindService(new PluginMySQL.Plugin.Plugin())},
+                Services = {Publisher.BindService(new PluginCassandra.Plugin.Plugin())},
                 Ports = {new ServerPort("localhost", 0, ServerCredentials.Insecure)}
             };
             server.Start();
@@ -244,7 +244,7 @@ namespace PluginMySQLTest.Plugin
             // setup
             Server server = new Server
             {
-                Services = {Publisher.BindService(new PluginMySQL.Plugin.Plugin())},
+                Services = {Publisher.BindService(new PluginCassandra.Plugin.Plugin())},
                 Ports = {new ServerPort("localhost", 0, ServerCredentials.Insecure)}
             };
             server.Start();
@@ -297,7 +297,7 @@ namespace PluginMySQLTest.Plugin
             // setup
             Server server = new Server
             {
-                Services = {Publisher.BindService(new PluginMySQL.Plugin.Plugin())},
+                Services = {Publisher.BindService(new PluginCassandra.Plugin.Plugin())},
                 Ports = {new ServerPort("localhost", 0, ServerCredentials.Insecure)}
             };
             server.Start();
@@ -342,7 +342,7 @@ namespace PluginMySQLTest.Plugin
             // setup
             Server server = new Server
             {
-                Services = {Publisher.BindService(new PluginMySQL.Plugin.Plugin())},
+                Services = {Publisher.BindService(new PluginCassandra.Plugin.Plugin())},
                 Ports = {new ServerPort("localhost", 0, ServerCredentials.Insecure)}
             };
             server.Start();
@@ -414,7 +414,7 @@ namespace PluginMySQLTest.Plugin
             // setup
             Server server = new Server
             {
-                Services = {Publisher.BindService(new PluginMySQL.Plugin.Plugin())},
+                Services = {Publisher.BindService(new PluginCassandra.Plugin.Plugin())},
                 Ports = {new ServerPort("localhost", 0, ServerCredentials.Insecure)}
             };
             server.Start();
@@ -480,7 +480,7 @@ namespace PluginMySQLTest.Plugin
             // setup
             Server server = new Server
             {
-                Services = {Publisher.BindService(new PluginMySQL.Plugin.Plugin())},
+                Services = {Publisher.BindService(new PluginCassandra.Plugin.Plugin())},
                 Ports = {new ServerPort("localhost", 0, ServerCredentials.Insecure)}
             };
             server.Start();
@@ -538,7 +538,7 @@ namespace PluginMySQLTest.Plugin
             // setup
             Server server = new Server
             {
-                Services = {Publisher.BindService(new PluginMySQL.Plugin.Plugin())},
+                Services = {Publisher.BindService(new PluginCassandra.Plugin.Plugin())},
                 Ports = {new ServerPort("localhost", 0, ServerCredentials.Insecure)}
             };
             server.Start();
@@ -590,7 +590,7 @@ namespace PluginMySQLTest.Plugin
             // setup
             Server server = new Server
             {
-                Services = {Publisher.BindService(new PluginMySQL.Plugin.Plugin())},
+                Services = {Publisher.BindService(new PluginCassandra.Plugin.Plugin())},
                 Ports = {new ServerPort("localhost", 0, ServerCredentials.Insecure)}
             };
             server.Start();
@@ -687,7 +687,7 @@ namespace PluginMySQLTest.Plugin
             // setup
             Server server = new Server
             {
-                Services = {Publisher.BindService(new PluginMySQL.Plugin.Plugin())},
+                Services = {Publisher.BindService(new PluginCassandra.Plugin.Plugin())},
                 Ports = {new ServerPort("localhost", 0, ServerCredentials.Insecure)}
             };
             server.Start();

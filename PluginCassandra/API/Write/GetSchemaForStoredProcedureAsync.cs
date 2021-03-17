@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
 using Naveego.Sdk.Plugins;
-using PluginMySQL.API.Factory;
-using PluginMySQL.DataContracts;
+using PluginCassandra.API.Factory;
+using PluginCassandra.DataContracts;
 
-namespace PluginMySQL.API.Write
+namespace PluginCassandra.API.Write
 {
     public static partial class Write
     {

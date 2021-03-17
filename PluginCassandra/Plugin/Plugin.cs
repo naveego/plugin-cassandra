@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using Naveego.Sdk.Plugins;
 using Newtonsoft.Json;
-using PluginMySQL.API.Discover;
-using PluginMySQL.API.Factory;
-using PluginMySQL.API.Read;
-using PluginMySQL.API.Replication;
-using PluginMySQL.API.Write;
-using PluginMySQL.DataContracts;
-using PluginMySQL.Helper;
+using PluginCassandra.API.Discover;
+using PluginCassandra.API.Factory;
+using PluginCassandra.API.Read;
+using PluginCassandra.API.Replication;
+using PluginCassandra.API.Write;
+using PluginCassandra.DataContracts;
+using PluginCassandra.Helper;
 
-namespace PluginMySQL.Plugin
+namespace PluginCassandra.Plugin
 {
     public class Plugin : Publisher.PublisherBase
     {

@@ -1,8 +1,8 @@
 using Naveego.Sdk.Plugins;
-using PluginMySQL.API.Utility;
-using PluginMySQL.DataContracts;
+using PluginCassandra.API.Utility;
+using PluginCassandra.DataContracts;
 
-namespace PluginMySQL.API.Replication
+namespace PluginCassandra.API.Replication
 {
     public static partial class Replication
     {

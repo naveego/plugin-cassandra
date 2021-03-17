@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using PluginMySQL.DataContracts;
+using PluginCassandra.DataContracts;
 
-namespace PluginMySQL.API.Replication
+namespace PluginCassandra.API.Replication
 {
     public static partial class Replication
     {

@@ -17,7 +17,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\PluginMySQL\PluginMySQL.csproj" />
+      <ProjectReference Include="..\PluginCassandra\PluginCassandra.csproj" />
     </ItemGroup>
+    
 
 </Project>

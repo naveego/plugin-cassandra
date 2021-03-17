@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using Naveego.Sdk.Plugins;
-using PluginMySQL.DataContracts;
+using PluginCassandra.DataContracts;
 
-namespace PluginMySQL.API.Replication
+namespace PluginCassandra.API.Replication
 {
     public static partial class Replication 
     {

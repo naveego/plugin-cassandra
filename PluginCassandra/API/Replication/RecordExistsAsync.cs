@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
-using PluginMySQL.API.Factory;
-using PluginMySQL.DataContracts;
+using PluginCassandra.API.Factory;
+using PluginCassandra.DataContracts;
 
-namespace PluginMySQL.API.Replication
+namespace PluginCassandra.API.Replication
 {
     public static partial class Replication
     {

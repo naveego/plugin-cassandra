@@ -1,7 +1,6 @@
-using System.Data;
-using PluginMySQL.Helper;
+using PluginCassandra.Helper;
 
-namespace PluginMySQL.API.Factory
+namespace PluginCassandra.API.Factory
 {
     public interface IConnectionFactory
     {

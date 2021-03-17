@@ -1,4 +1,4 @@
-namespace PluginMySQL.API.Utility
+namespace PluginCassandra.API.Utility
 {
     public static partial class Utility
     {

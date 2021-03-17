@@ -1,6 +1,6 @@
-using PluginMySQL.API.Utility;
+using PluginCassandra.API.Utility;
 
-namespace PluginMySQL.DataContracts
+namespace PluginCassandra.DataContracts
 {
     public class WriteStoredProcedure
     {

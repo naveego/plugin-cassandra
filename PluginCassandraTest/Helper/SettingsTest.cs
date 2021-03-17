@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
-using PluginMySQL.Helper;
+using PluginCassandra.Helper;
 using Xunit;
 
-namespace PluginMySQLTest.Helper
+namespace PluginCassandraTest.Helper
 {
     public class SettingsTest
     {

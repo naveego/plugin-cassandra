@@ -1,7 +1,7 @@
 using System;
 using Naveego.Sdk.Plugins;
 
-namespace PluginMySQL.DataContracts
+namespace PluginCassandra.DataContracts
 {
     public class ReplicationMetaData
     {

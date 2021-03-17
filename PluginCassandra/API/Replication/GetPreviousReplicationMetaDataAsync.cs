@@ -2,12 +2,12 @@ using System;
 using System.Threading.Tasks;
 using Naveego.Sdk.Plugins;
 using Newtonsoft.Json;
-using PluginMySQL.API.Factory;
-using PluginMySQL.DataContracts;
-using PluginMySQL.Helper;
-using Constants = PluginMySQL.API.Utility.Constants;
+using PluginCassandra.API.Factory;
+using PluginCassandra.DataContracts;
+using PluginCassandra.Helper;
+using Constants = PluginCassandra.API.Utility.Constants;
 
-namespace PluginMySQL.API.Replication
+namespace PluginCassandra.API.Replication
 {
     public static partial class Replication
     {

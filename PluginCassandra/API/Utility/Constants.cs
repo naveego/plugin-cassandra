@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using PluginMySQL.DataContracts;
+using PluginCassandra.DataContracts;
 
-namespace PluginMySQL.API.Utility
+namespace PluginCassandra.API.Utility
 {
     public static class Constants
     {

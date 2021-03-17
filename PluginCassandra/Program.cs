@@ -2,9 +2,9 @@
 using System.Linq;
 using Grpc.Core;
 using Naveego.Sdk.Plugins;
-using PluginMySQL.Helper;
+using PluginCassandra.Helper;
 
-namespace PluginMySQL
+namespace PluginCassandra
 {
     class Program
     {

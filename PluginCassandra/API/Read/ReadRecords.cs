@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using Naveego.Sdk.Plugins;
 using Newtonsoft.Json;
-using PluginMySQL.API.Factory;
-using PluginMySQL.Helper;
+using PluginCassandra.API.Factory;
+using PluginCassandra.Helper;
 
-namespace PluginMySQL.API.Read
+namespace PluginCassandra.API.Read
 {
     public static partial class Read
     {

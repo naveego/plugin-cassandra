@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
 
-namespace PluginMySQL.Helper
+namespace PluginCassandra.Helper
 {
     public class Settings
     {

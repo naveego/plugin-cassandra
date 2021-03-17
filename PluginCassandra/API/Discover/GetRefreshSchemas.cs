@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using Google.Protobuf.Collections;
 using Naveego.Sdk.Plugins;
-using PluginMySQL.API.Factory;
+using PluginCassandra.API.Factory;
 
-namespace PluginMySQL.API.Discover
+namespace PluginCassandra.API.Discover
 {
     public static partial class Discover
     {

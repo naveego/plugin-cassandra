@@ -2,10 +2,10 @@ using System;
 using System.IO;
 using System.Linq;
 using Naveego.Sdk.Plugins;
-using PluginMySQL.Helper;
+using PluginCassandra.Helper;
 using Xunit;
 
-namespace PluginMySQLTest.Helper
+namespace PluginCassandraTest.Helper
 {
     public class LoggerTest
     {

@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using Naveego.Sdk.Plugins;
 using Newtonsoft.Json;
-using PluginMySQL.API.Factory;
-using PluginMySQL.API.Utility;
-using PluginMySQL.DataContracts;
-using PluginMySQL.Helper;
+using PluginCassandra.API.Factory;
+using PluginCassandra.API.Utility;
+using PluginCassandra.DataContracts;
+using PluginCassandra.Helper;
 
-namespace PluginMySQL.API.Replication
+namespace PluginCassandra.API.Replication
 {
     public static partial class Replication
     {

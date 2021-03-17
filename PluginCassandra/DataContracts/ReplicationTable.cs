@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace PluginMySQL.DataContracts
+namespace PluginCassandra.DataContracts
 {
     public class ReplicationTable
     {
