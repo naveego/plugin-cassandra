@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Naveego.Sdk.Logging;
 using Newtonsoft.Json;
 using PluginCassandra.API.Factory;
 using PluginCassandra.DataContracts;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Naveego.Sdk.Logging;
 using PluginCassandra.API.Factory;
 using PluginCassandra.DataContracts;
 using PluginCassandra.Helper;
