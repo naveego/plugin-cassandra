@@ -23,7 +23,7 @@
     "ui": {
       "ui:widget": "code",
       "ui:options": {
-        "language": "sql"
+        "language": "cql3"
       }
     },
     "schema": {
