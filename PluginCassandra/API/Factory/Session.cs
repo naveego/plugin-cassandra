@@ -1,7 +1,6 @@
 using System;
 using System.Data;
 using System.Threading.Tasks;
-using MySql.Data.MySqlClient;
 using PluginCassandra.Helper;
 using Cassandra;
 
