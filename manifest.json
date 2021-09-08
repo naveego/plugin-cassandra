@@ -35,7 +35,6 @@
       "ui:order": [
         "Hostname",
         "Port",
-        "Database",
         "Username",
         "Password"
       ],
