@@ -176,7 +176,7 @@ namespace PluginCassandraTest.Plugin
             Assert.Equal("Request", property.Id);
             Assert.Equal("Request", property.Name);
             Assert.Equal("", property.Description);
-            Assert.Equal(PropertyType.Text, property.Type);
+            Assert.Equal(PropertyType.String, property.Type);
             Assert.False(property.IsKey);
             Assert.True(property.IsNullable);
 
@@ -282,7 +282,7 @@ namespace PluginCassandraTest.Plugin
             Assert.Equal("keyspace_name", property.Id);
             Assert.Equal("keyspace_name", property.Name);
             Assert.Equal("", property.Description);
-            Assert.Equal(PropertyType.Text, property.Type);
+            Assert.Equal(PropertyType.String, property.Type);
             Assert.True(property.IsKey);
             Assert.False(property.IsNullable);
 

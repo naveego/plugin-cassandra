@@ -14,32 +14,18 @@ namespace PluginCassandra.API.Read
     {
         public static async IAsyncEnumerable<Record> ReadRecords(ISessionFactory sessionFactory, Schema schema)
         {
-            //var conn = connFactory.GetConnection();
-
+            
             var session = sessionFactory.GetSession();
             
             try
             {
-                //await conn.OpenAsync();
-
                 var query = schema.Query;
 
                 if (string.IsNullOrWhiteSpace(query))
                 {
                     query = $"SELECT * FROM {schema.Id}";
                 }
-
-                //var cmd = connFactory.GetCommand(query, conn);
-                // try
-                // {
-                //     reader = await cmd.ExecuteReaderAsync();
-                // }
-                // catch (Exception e)
-                // {
-                //     Logger.Error(e, e.Message);
-                //     yield break;
-                // }
-
+                
                 RowSet rows;
                 
                 try
@@ -51,7 +37,6 @@ namespace PluginCassandra.API.Read
                     Logger.Error(e, e.Message);
                     yield break;
                 }
-                
                 
                 if (rows != null)
                 {

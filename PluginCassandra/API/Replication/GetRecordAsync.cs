@@ -25,16 +25,6 @@ WHERE {2} = '{3}'";
                 Utility.Utility.GetSafeName(table.Columns.Find(c => c.PrimaryKey == true).ColumnName, '"'),
                 primaryKeyValue));
 
-            // var cmd = connFactory.GetCommand(string.Format(GetRecordQuery,
-            //         Utility.Utility.GetSafeName(table.SchemaName, '`'),
-            //         Utility.Utility.GetSafeName(table.TableName, '`'),
-            //         Utility.Utility.GetSafeName(table.Columns.Find(c => c.PrimaryKey == true).ColumnName, '`'),
-            //         primaryKeyValue
-            //     ),
-            //     conn);
-            //
-            // var reader = await cmd.ExecuteReaderAsync();
-
             Dictionary<string, object> recordMap = null;
             // check if record exists
 
@@ -56,28 +46,6 @@ WHERE {2} = '{3}'";
                     }
                 }
             }
-            
-            // if (reader.HasRows())
-            // {
-            //     await reader.ReadAsync();
-            //
-            //     recordMap = new Dictionary<string, object>();
-            //
-            //     foreach (var column in table.Columns)
-            //     {
-            //         try
-            //         {
-            //             recordMap[column.ColumnName] = reader.GetValueById(column.ColumnName, '`');
-            //         }
-            //         catch (Exception e)
-            //         {
-            //             Logger.Error(e, $"No column with column name: {column.ColumnName}");
-            //             Logger.Error(e, e.Message);
-            //             recordMap[column.ColumnName] = null;
-            //         }
-            //     }
-            // }
-
             return recordMap;
             
         }

@@ -16,14 +16,10 @@ namespace PluginCassandra.API.Replication
             ReplicationTable table,
             Dictionary<string, object> recordMap)
         {
-            // var conn = connFactory.GetConnection();
-
             var session = sessionFactory.GetSession();
             
             try
             {
-                //await conn.OpenAsync();
-                
                 // try to insert
                 var querySb =
                     new StringBuilder(
@@ -79,10 +75,6 @@ namespace PluginCassandra.API.Replication
                 var query = querySb.ToString();
 
                 Logger.Debug($"Insert record query: {query}");
-
-                // var cmd = connFactory.GetCommand(query, conn);
-                //
-                // await cmd.ExecuteNonQueryAsync();
 
                 await session.Execute(query);
 
@@ -140,9 +132,6 @@ namespace PluginCassandra.API.Replication
 
                     await session.Execute(query);
 
-                    // var cmd = connFactory.GetCommand(query, conn);
-                    //
-                    // await cmd.ExecuteNonQueryAsync();
                 }
                 catch (Exception exception)
                 {

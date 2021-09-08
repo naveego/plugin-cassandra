@@ -28,9 +28,6 @@ namespace PluginCassandra.API.Replication
                 await EnsureTableAsync(sessionFactory, table);
 
                 // check if metadata exists
-
-                //await conn.OpenAsync();
-
                 var session = sessionFactory.GetSession();
 
                 var rows = await session.Execute(string.Format(GetMetaDataQuery,

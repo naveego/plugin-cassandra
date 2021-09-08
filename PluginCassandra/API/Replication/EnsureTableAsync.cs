@@ -20,12 +20,9 @@ AND table_name = '{1}'";
         public static async Task EnsureTableAsync(ISessionFactory sessionFactory, ReplicationTable table)
         {
             var session = sessionFactory.GetSession();
-           // var conn = connFactory.GetConnection();
-
+            
             try
             {
-                //await conn.OpenAsync();
-
                 Logger.Info($"Creating Schema... {table.SchemaName}");
 
                 await session.Execute($"CREATE KEYSPACE IF NOT EXISTS {table.SchemaName} WITH REPLICATION = {{'class' : 'SimpleStrategy', 'replication_factor' : 1}};");
@@ -36,10 +33,7 @@ AND table_name = '{1}'";
                 Logger.Info($"Creating Table: {string.Format(EnsureTableQuery, table.SchemaName, table.TableName)}");
 
                 // check if table exists
-                // var reader = await cmd.ExecuteReaderAsync();
-                //await reader.ReadAsync();
                 var count = (long) rows.First()["count"];
-                // await conn.CloseAsync();
 
                 if (count == 0)
                 {
@@ -59,17 +53,8 @@ AND table_name = '{1}'";
                         }
                     }
 
-                    // if (hasPrimaryKey)
-                    // {
-                    //     primaryKeySb.Length--;
-                    //     primaryKeySb.Append(")");
-                    //     querySb.Append($"{primaryKeySb});");
-                    // }
-                    // else
-                    // {
                     querySb.Length--;
                     querySb.Append(");");
-                    // }
 
                     var query = querySb.ToString();
                     Logger.Info($"Creating Table: {query}");

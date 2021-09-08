@@ -37,7 +37,6 @@ WHERE {Utility.Utility.GetSafeName(Constants.ReplicationMetaDataJobId)} = '{{6}}
         public static async Task UpsertReplicationMetaDataAsync(ISessionFactory sessionFactory, ReplicationTable table,
             ReplicationMetaData metaData)
         {
-            // var conn = connFactory.GetConnection();
             var session = sessionFactory.GetSession();
             try
             {
@@ -51,24 +50,6 @@ WHERE {Utility.Utility.GetSafeName(Constants.ReplicationMetaDataJobId)} = '{{6}}
                     metaData.ReplicatedShapeName,
                     metaData.Timestamp
                 ));
-                // await conn.OpenAsync();
-                //
-                // // try to insert
-                // var cmd = connFactory.GetCommand(
-                //     string.Format(InsertMetaDataQuery,
-                //         Utility.Utility.GetSafeName(table.SchemaName, '`'),
-                //         Utility.Utility.GetSafeName(table.TableName, '`'),
-                //         metaData.Request.DataVersions.JobId,
-                //         JsonConvert.SerializeObject(metaData.Request).Replace("\\", "\\\\"),
-                //         metaData.ReplicatedShapeId,
-                //         metaData.ReplicatedShapeName,
-                //         metaData.Timestamp
-                //     ),
-                //     conn);
-                
-                
-                
-                //await cmd.ExecuteNonQueryAsync();
             }
             catch (Exception e)
             {
@@ -79,7 +60,6 @@ WHERE {Utility.Utility.GetSafeName(Constants.ReplicationMetaDataJobId)} = '{{6}}
                         Utility.Utility.GetSafeName(table.SchemaName, '"'),
                         Utility.Utility.GetSafeName(table.TableName, '"'),
                         JsonConvert.SerializeObject(metaData.Request),
-                        // JsonConvert.SerializeObject(metaData.Request).Replace("\\", "\\\\"),
                         metaData.ReplicatedShapeId,
                         metaData.ReplicatedShapeName,
                         metaData.Timestamp,

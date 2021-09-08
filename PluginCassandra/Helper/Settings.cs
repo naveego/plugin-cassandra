@@ -25,7 +25,10 @@ namespace PluginCassandra.Helper
             {
                 throw new Exception("The Username property must be set");
             }
-            
+            if (String.IsNullOrEmpty(Port))
+            {
+                throw new Exception("The Port property must be set");
+            }
             if (String.IsNullOrEmpty(Password))
             {
                 throw new Exception("The Password property must be set");

@@ -15,22 +15,7 @@ namespace PluginCassandra.API.Replication
         public static async Task<bool> RecordExistsAsync(ISessionFactory sessionFactory, ReplicationTable table,
             string primaryKeyValue)
         {
-            var session = sessionFactory.GetConnection();
-            
-            // await conn.OpenAsync();
-            //
-            // var cmd = connFactory.GetCommand(string.Format(RecordExistsQuery,
-            //         Utility.Utility.GetSafeName(table.SchemaName, '`'),
-            //         Utility.Utility.GetSafeName(table.TableName, '`'),
-            //         Utility.Utility.GetSafeName(table.Columns.Find(c => c.PrimaryKey == true).ColumnName, '`'),
-            //         primaryKeyValue
-            //     ),
-            //     conn);
-
-            // check if record exists
-            // var reader = await cmd.ExecuteReaderAsync();
-            // await reader.ReadAsync();
-            // var count = (long) reader.GetValueById("count");
+            var session = sessionFactory.GetSession();
 
             var rows = await session.Execute(string.Format(RecordExistsQuery,
                 Utility.Utility.GetSafeName(table.SchemaName, '"'),

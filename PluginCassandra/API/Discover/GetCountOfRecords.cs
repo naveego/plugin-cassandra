@@ -22,10 +22,6 @@ namespace PluginCassandra.API.Discover
                 {
                     count = Int32.Parse(row["count"].ToString());
                 }
-                // while (await reader.ReadAsync())
-                // {
-                //     count = Convert.ToInt32(reader.GetValueById("count"));
-                // }
                 
                 return count == -1
                     ? new Count
@@ -40,8 +36,6 @@ namespace PluginCassandra.API.Discover
             }
             catch(Exception e)
             {
-                var debug = e.Message;
-
                 return new Count
                 {
                     Kind = Count.Types.Kind.Unavailable,

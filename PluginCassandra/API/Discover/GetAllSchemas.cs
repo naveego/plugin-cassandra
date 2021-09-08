@@ -9,42 +9,23 @@ namespace PluginCassandra.API.Discover
 {
     public static partial class Discover
     {
-        private const string TableName = "table_name";
-        private const string TableSchema = "keyspace_name";
-        //private const string TableType = "TABLE_TYPE";
-        private const string ColumnName = "column_name";
-        private const string DataType = "type";
-        private const string ColumnKey = "kind";
-        // private const string IsNullable = "IS_NULLABLE";
-        // private const string CharacterMaxLength = "CHARACTER_MAXIMUM_LENGTH";
-
-
-        
         private const string GetAllTablesAndColumnsQuery = @"
-SELECT keyspace_name, 
-       table_name, 
-       column_name, 
-       type, 
-       kind
-FROM system_schema.columns";
+            SELECT keyspace_name, 
+                   table_name, 
+                   column_name, 
+                   type, 
+                   kind
+            FROM system_schema.columns";
 
         public static async IAsyncEnumerable<Schema> GetAllSchemas(ISessionFactory sessionFactory, int sampleSize = 5)
         {
 
             var session = sessionFactory.GetSession();
 
-
             var rows = await session.Execute(GetAllTablesAndColumnsQuery);
-
-            //var data = new List<string> { };
 
             Schema schema = null;
             var currentSchemaId = "";
-
-            // foreach (var datum in rows.First())
-            // {
-            //     data.Add(datum?.ToString());
-            // }
 
             foreach (var row in rows)
             {
@@ -135,11 +116,10 @@ FROM system_schema.columns";
                 case "char":
                 case "varchar":
                 case "tinytext":
-                    return PropertyType.String;
                 case "text":
                 case "mediumtext":
                 case "longtext":
-                    return PropertyType.Text;
+                    return PropertyType.String;
                 default:
                     return PropertyType.String;
             }

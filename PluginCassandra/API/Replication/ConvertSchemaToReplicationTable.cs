@@ -54,9 +54,9 @@ namespace PluginCassandra.API.Replication
                 case PropertyType.String:
                     return "varchar";
                 case PropertyType.Text:
-                    return "text";
+                    return "string";
                 default:
-                    return "text";
+                    return "string";
             }
         }
     }
