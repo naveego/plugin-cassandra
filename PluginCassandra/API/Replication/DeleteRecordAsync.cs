@@ -9,30 +9,30 @@ namespace PluginCassandra.API.Replication
         private static readonly string DeleteRecordQuery = @"DELETE FROM {0}.{1}
 WHERE {2} = '{3}'";
 
-        public static async Task DeleteRecordAsync(IConnectionFactory connFactory, ReplicationTable table,
+        public static async Task DeleteRecordAsync(ISessionFactory sessionFactory, ReplicationTable table,
             string primaryKeyValue)
         {
-            var conn = connFactory.GetConnection();
+            // var conn = connFactory.GetConnection();
+            var session = sessionFactory.GetSession();
             
-            try
-            {
-                await conn.OpenAsync();
+            // await conn.OpenAsync();
+            //
+            // var cmd = connFactory.GetCommand(string.Format(DeleteRecordQuery,
+            //         Utility.Utility.GetSafeName(table.SchemaName, '`'),
+            //         Utility.Utility.GetSafeName(table.TableName, '`'),
+            //         Utility.Utility.GetSafeName(table.Columns.Find(c => c.PrimaryKey == true).ColumnName, '`'),
+            //         primaryKeyValue
+            //     ),
+            //     conn);
 
-                var cmd = connFactory.GetCommand(string.Format(DeleteRecordQuery,
-                        Utility.Utility.GetSafeName(table.SchemaName, '`'),
-                        Utility.Utility.GetSafeName(table.TableName, '`'),
-                        Utility.Utility.GetSafeName(table.Columns.Find(c => c.PrimaryKey == true).ColumnName, '`'),
-                        primaryKeyValue
-                    ),
-                    conn);
+            await session.Execute(string.Format(DeleteRecordQuery,
+                Utility.Utility.GetSafeName(table.SchemaName, '"'),
+                Utility.Utility.GetSafeName(table.TableName, '"'),
+                Utility.Utility.GetSafeName(table.Columns.Find(c => c.PrimaryKey == true).ColumnName, '"')));
 
-                // check if table exists
-                await cmd.ExecuteNonQueryAsync();
-            }
-            finally
-            {
-                await conn.CloseAsync();
-            }
+            // check if table exists
+            // await cmd.ExecuteNonQueryAsync();
+            
         }
     }
 }

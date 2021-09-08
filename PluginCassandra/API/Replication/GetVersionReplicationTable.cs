@@ -12,13 +12,13 @@ namespace PluginCassandra.API.Replication
             versionTable.Columns.Add(new ReplicationColumn
             {
                 ColumnName = Constants.ReplicationVersionRecordId,
-                DataType = "varchar(255)",
+                DataType = "varchar",
                 PrimaryKey = true
             });
             versionTable.Columns.Add(new ReplicationColumn
             {
                 ColumnName = Constants.ReplicationRecordId,
-                DataType = "varchar(255)",
+                DataType = "varchar",
                 PrimaryKey = false
             });
 

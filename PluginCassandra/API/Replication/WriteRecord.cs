@@ -29,7 +29,7 @@ namespace PluginCassandra.API.Replication
         /// <param name="config"></param>
         /// <param name="responseStream"></param>
         /// <returns>Error message string</returns>
-        public static async Task<string> WriteRecord(IConnectionFactory connFactory, Schema schema, Record record,
+        public static async Task<string> WriteRecord(ISessionFactory sessionFactory, Schema schema, Record record,
             ConfigureReplicationFormData config, IServerStreamWriter<RecordAck> responseStream)
         {
             // debug
@@ -60,9 +60,9 @@ namespace PluginCassandra.API.Replication
             
                 // get previous golden record
                 List<string> previousRecordVersionIds;
-                if (await RecordExistsAsync(connFactory, goldenTable, record.RecordId))
+                if (await RecordExistsAsync(sessionFactory, goldenTable, record.RecordId))
                 {
-                    var recordMap = await GetRecordAsync(connFactory, goldenTable, record.RecordId);
+                    var recordMap = await GetRecordAsync(sessionFactory, goldenTable, record.RecordId);
             
                     if (recordMap.ContainsKey(Constants.ReplicationVersionIds))
                     {
@@ -85,20 +85,20 @@ namespace PluginCassandra.API.Replication
                 {
                     // delete everything for this record
                     Logger.Debug($"shapeId: {safeSchemaName} | recordId: {record.RecordId} - DELETE");
-                    await DeleteRecordAsync(connFactory, goldenTable, record.RecordId);
+                    await DeleteRecordAsync(sessionFactory, goldenTable, record.RecordId);
 
                     foreach (var versionId in previousRecordVersionIds)
                     {
                         Logger.Debug(
                             $"shapeId: {safeSchemaName} | recordId: {record.RecordId} | versionId: {versionId} - DELETE");
-                        await DeleteRecordAsync(connFactory, versionTable, versionId);
+                        await DeleteRecordAsync(sessionFactory, versionTable, versionId);
                     }
                 }
                 else
                 {
                     // update record and remove/add versions
                     Logger.Debug($"shapeId: {safeSchemaName} | recordId: {record.RecordId} - UPSERT");
-                    await UpsertRecordAsync(connFactory, goldenTable, recordData);
+                    await UpsertRecordAsync(sessionFactory, goldenTable, recordData);
                 
                     // delete missing versions
                     var missingVersions = previousRecordVersionIds.Except(recordVersionIds);
@@ -106,7 +106,7 @@ namespace PluginCassandra.API.Replication
                     {
                         Logger.Debug(
                             $"shapeId: {safeSchemaName} | recordId: {record.RecordId} | versionId: {versionId} - DELETE");
-                        await DeleteRecordAsync(connFactory, versionTable, versionId);
+                        await DeleteRecordAsync(sessionFactory, versionTable, versionId);
                     }
                 
                     // upsert other versions
@@ -117,7 +117,7 @@ namespace PluginCassandra.API.Replication
                         var versionData = GetNamedRecordData(schema, version.DataJson);
                         versionData[Constants.ReplicationVersionRecordId] = version.RecordId;
                         versionData[Constants.ReplicationRecordId] = record.RecordId;
-                        await UpsertRecordAsync(connFactory, versionTable, versionData);
+                        await UpsertRecordAsync(sessionFactory, versionTable, versionData);
                     }
                 }
             

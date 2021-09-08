@@ -13,55 +13,73 @@ namespace PluginCassandra.API.Replication
         private static readonly string GetRecordQuery = @"SELECT * FROM {0}.{1}
 WHERE {2} = '{3}'";
 
-        public static async Task<Dictionary<string, object>> GetRecordAsync(IConnectionFactory connFactory,
+        public static async Task<Dictionary<string, object>> GetRecordAsync(ISessionFactory sessionFactory,
             ReplicationTable table,
             string primaryKeyValue)
         {
-            var conn = connFactory.GetConnection();
-            
-            try
+            var session = sessionFactory.GetSession();
+
+            var rows = await session.Execute(string.Format(GetRecordQuery,
+                Utility.Utility.GetSafeName(table.SchemaName, '"'),
+                Utility.Utility.GetSafeName(table.TableName, '"'),
+                Utility.Utility.GetSafeName(table.Columns.Find(c => c.PrimaryKey == true).ColumnName, '"'),
+                primaryKeyValue));
+
+            // var cmd = connFactory.GetCommand(string.Format(GetRecordQuery,
+            //         Utility.Utility.GetSafeName(table.SchemaName, '`'),
+            //         Utility.Utility.GetSafeName(table.TableName, '`'),
+            //         Utility.Utility.GetSafeName(table.Columns.Find(c => c.PrimaryKey == true).ColumnName, '`'),
+            //         primaryKeyValue
+            //     ),
+            //     conn);
+            //
+            // var reader = await cmd.ExecuteReaderAsync();
+
+            Dictionary<string, object> recordMap = null;
+            // check if record exists
+
+            foreach (var row in rows)
             {
-                await conn.OpenAsync();
-
-                var cmd = connFactory.GetCommand(string.Format(GetRecordQuery,
-                        Utility.Utility.GetSafeName(table.SchemaName, '`'),
-                        Utility.Utility.GetSafeName(table.TableName, '`'),
-                        Utility.Utility.GetSafeName(table.Columns.Find(c => c.PrimaryKey == true).ColumnName, '`'),
-                        primaryKeyValue
-                    ),
-                    conn);
-            
-                var reader = await cmd.ExecuteReaderAsync();
-
-                Dictionary<string, object> recordMap = null;
-                // check if record exists
-                if (reader.HasRows())
+                recordMap = new Dictionary<string, object>();
+                
+                foreach (var column in table.Columns)
                 {
-                    await reader.ReadAsync();
-
-                    recordMap = new Dictionary<string, object>();
-
-                    foreach (var column in table.Columns)
+                    try
                     {
-                        try
-                        {
-                            recordMap[column.ColumnName] = reader.GetValueById(column.ColumnName, '`');
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Error(e, $"No column with column name: {column.ColumnName}");
-                            Logger.Error(e, e.Message);
-                            recordMap[column.ColumnName] = null;
-                        }
+                        recordMap[column.ColumnName] = row[column.ColumnName];
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Error(e, $"No column with column name: {column.ColumnName}");
+                        Logger.Error(e, e.Message);
+                        recordMap[column.ColumnName] = null;
                     }
                 }
+            }
+            
+            // if (reader.HasRows())
+            // {
+            //     await reader.ReadAsync();
+            //
+            //     recordMap = new Dictionary<string, object>();
+            //
+            //     foreach (var column in table.Columns)
+            //     {
+            //         try
+            //         {
+            //             recordMap[column.ColumnName] = reader.GetValueById(column.ColumnName, '`');
+            //         }
+            //         catch (Exception e)
+            //         {
+            //             Logger.Error(e, $"No column with column name: {column.ColumnName}");
+            //             Logger.Error(e, e.Message);
+            //             recordMap[column.ColumnName] = null;
+            //         }
+            //     }
+            // }
 
-                return recordMap;
-            }
-            finally
-            {
-                await conn.CloseAsync();
-            }
+            return recordMap;
+            
         }
     }
 }

@@ -18,10 +18,10 @@ namespace PluginCassandraTest.Plugin
         {
             return new Settings
             {
-                Hostname = "150.136.152.223",
-                Database = "classicmodels",
-                Username = "root",
-                Password = "dtC5&CFiQ$9j"
+                Hostname = "",
+                Port = "",
+                Username = "",
+                Password = ""
             };
         }
 
@@ -163,22 +163,22 @@ namespace PluginCassandraTest.Plugin
 
             // assert
             Assert.IsType<DiscoverSchemasResponse>(response);
-            Assert.Equal(17, response.Schemas.Count);
+            Assert.Equal(41, response.Schemas.Count);
 
             var schema = response.Schemas[0];
-            Assert.Equal($"`classicmodels`.`customers`", schema.Id);
-            Assert.Equal("classicmodels.customers", schema.Name);
+            Assert.Equal($"\"test\".\"NaveegoReplicationMetaData\"", schema.Id);
+            Assert.Equal("test.NaveegoReplicationMetaData", schema.Name);
             Assert.Equal($"", schema.Query);
-            Assert.Equal(10, schema.Sample.Count);
-            Assert.Equal(13, schema.Properties.Count);
+            Assert.Equal(1, schema.Sample.Count);
+            Assert.Equal(5, schema.Properties.Count);
 
-            var property = schema.Properties[7];
-            Assert.Equal("`customerNumber`", property.Id);
-            Assert.Equal("customerNumber", property.Name);
+            var property = schema.Properties[3];
+            Assert.Equal("Request", property.Id);
+            Assert.Equal("Request", property.Name);
             Assert.Equal("", property.Description);
-            Assert.Equal(PropertyType.Integer, property.Type);
-            Assert.True(property.IsKey);
-            Assert.False(property.IsNullable);
+            Assert.Equal(PropertyType.Text, property.Type);
+            Assert.False(property.IsKey);
+            Assert.True(property.IsNullable);
 
             // cleanup
             await channel.ShutdownAsync();
@@ -207,7 +207,7 @@ namespace PluginCassandraTest.Plugin
             {
                 Mode = DiscoverSchemasRequest.Types.Mode.Refresh,
                 SampleSize = 10,
-                ToRefresh = {GetTestSchema("`classicmodels`.`customers`", "classicmodels.customers")}
+                ToRefresh = {GetTestSchema("\"system_schema\".\"tables\"", "system_schema.tables")}
             };
 
             // act
@@ -219,19 +219,19 @@ namespace PluginCassandraTest.Plugin
             Assert.Single(response.Schemas);
 
             var schema = response.Schemas[0];
-            Assert.Equal($"`classicmodels`.`customers`", schema.Id);
-            Assert.Equal("classicmodels.customers", schema.Name);
+            Assert.Equal($"\"system_schema\".\"tables\"", schema.Id);
+            Assert.Equal("system_schema.tables", schema.Name);
             Assert.Equal($"", schema.Query);
             Assert.Equal(10, schema.Sample.Count);
-            Assert.Equal(13, schema.Properties.Count);
+            Assert.Equal(20, schema.Properties.Count);
 
             var property = schema.Properties[0];
-            Assert.Equal("`customerNumber`", property.Id);
-            Assert.Equal("customerNumber", property.Name);
+            Assert.Equal("bloom_filter_fp_chance", property.Id);
+            Assert.Equal("bloom_filter_fp_chance", property.Name);
             Assert.Equal("", property.Description);
-            Assert.Equal(PropertyType.Integer, property.Type);
-            Assert.True(property.IsKey);
-            Assert.False(property.IsNullable);
+            Assert.Equal(PropertyType.Float, property.Type);
+            Assert.False(property.IsKey);
+            Assert.True(property.IsNullable);
 
             // cleanup
             await channel.ShutdownAsync();
@@ -260,7 +260,7 @@ namespace PluginCassandraTest.Plugin
             {
                 Mode = DiscoverSchemasRequest.Types.Mode.Refresh,
                 SampleSize = 10,
-                ToRefresh = {GetTestSchema("test", "test", $"SELECT * FROM `classicmodels`.`customers`")}
+                ToRefresh = {GetTestSchema("\"system_schema\".\"tables\"", "system_schema.tables", $"SELECT * FROM \"system_schema\".\"tables\"")}
             };
 
             // act
@@ -272,17 +272,17 @@ namespace PluginCassandraTest.Plugin
             Assert.Single(response.Schemas);
 
             var schema = response.Schemas[0];
-            Assert.Equal($"test", schema.Id);
-            Assert.Equal("test", schema.Name);
-            Assert.Equal($"SELECT * FROM `classicmodels`.`customers`", schema.Query);
+            Assert.Equal($"\"system_schema\".\"tables\"", schema.Id);
+            Assert.Equal("system_schema.tables", schema.Name);
+            Assert.Equal($"SELECT * FROM \"system_schema\".\"tables\"", schema.Query);
             Assert.Equal(10, schema.Sample.Count);
-            Assert.Equal(13, schema.Properties.Count);
+            Assert.Equal(20, schema.Properties.Count);
 
             var property = schema.Properties[0];
-            Assert.Equal("`customerNumber`", property.Id);
-            Assert.Equal("customerNumber", property.Name);
+            Assert.Equal("keyspace_name", property.Id);
+            Assert.Equal("keyspace_name", property.Name);
             Assert.Equal("", property.Description);
-            Assert.Equal(PropertyType.Integer, property.Type);
+            Assert.Equal(PropertyType.Text, property.Type);
             Assert.True(property.IsKey);
             Assert.False(property.IsNullable);
 
@@ -327,7 +327,7 @@ namespace PluginCassandraTest.Plugin
             {
                 // assert
                 Assert.IsType<RpcException>(e);
-                Assert.Contains("You have an error in your SQL syntax", e.Message);
+                Assert.Contains("Error received from peer", e.Message);
             }
 
             // cleanup
@@ -352,7 +352,7 @@ namespace PluginCassandraTest.Plugin
             var channel = new Channel($"localhost:{port}", ChannelCredentials.Insecure);
             var client = new Publisher.PublisherClient(channel);
 
-            var schema = GetTestSchema("`classicmodels`.`customers`", "classicmodels.customers");
+            var schema = GetTestSchema("\"system_schema\".\"tables\"", "system_schema.tables");
 
             var connectRequest = GetConnectSettings();
 
@@ -386,22 +386,11 @@ namespace PluginCassandraTest.Plugin
             }
 
             // assert
-            Assert.Equal(122, records.Count);
+            Assert.Equal(41, records.Count);
 
             var record = JsonConvert.DeserializeObject<Dictionary<string, object>>(records[0].DataJson);
-            Assert.Equal((long) 103, record["`customerNumber`"]);
-            Assert.Equal("Atelier graphique", record["`customerName`"]);
-            Assert.Equal("Schmitt", record["`contactLastName`"]);
-            Assert.Equal("Carine", record["`contactFirstName`"]);
-            Assert.Equal("40.32.2555", record["`phone`"]);
-            Assert.Equal("54, rue Royale", record["`addressLine1`"]);
-            Assert.Equal("", record["`addressLine2`"]);
-            Assert.Equal("Nantes", record["`city`"]);
-            Assert.Equal("", record["`state`"]);
-            Assert.Equal("44000", record["`postalCode`"]);
-            Assert.Equal("France", record["`country`"]);
-            Assert.Equal((long) 1370, record["`salesRepEmployeeNumber`"]);
-            Assert.Equal("21000.00", record["`creditLimit`"]);
+            Assert.Equal("test", record["keyspace_name"]);
+            Assert.Equal(0.01, record["bloom_filter_fp_chance"]);
 
             // cleanup
             await channel.ShutdownAsync();
@@ -424,7 +413,8 @@ namespace PluginCassandraTest.Plugin
             var channel = new Channel($"localhost:{port}", ChannelCredentials.Insecure);
             var client = new Publisher.PublisherClient(channel);
 
-            var schema = GetTestSchema("test", "test", $"SELECT * FROM `classicmodels`.`orders`");
+            // var schema = GetTestSchema("test", "test", $"SELECT * FROM `classicmodels`.`orders`");
+            var schema = GetTestSchema("\"system_schema\".\"tables\"", "system_schema.tables", $"SELECT * FROM \"system_schema\".\"tables\"");
 
             var connectRequest = GetConnectSettings();
 
@@ -458,16 +448,11 @@ namespace PluginCassandraTest.Plugin
             }
 
             // assert
-            Assert.Equal(326, records.Count);
+            Assert.Equal(41, records.Count);
 
             var record = JsonConvert.DeserializeObject<Dictionary<string, object>>(records[0].DataJson);
-            Assert.Equal((long) 10100, record["`orderNumber`"]);
-            Assert.Equal(DateTime.Parse("2003-01-06"), record["`orderDate`"]);
-            Assert.Equal(DateTime.Parse("2003-01-13"), record["`requiredDate`"]);
-            Assert.Equal(DateTime.Parse("2003-01-10"), record["`shippedDate`"]);
-            Assert.Equal("Shipped", record["`status`"]);
-            Assert.Equal("", record["`comments`"]);
-            Assert.Equal((long) 363, record["`customerNumber`"]);
+            Assert.Equal("test", record["keyspace_name"]);
+            Assert.Equal(0.01, record["bloom_filter_fp_chance"]);
 
             // cleanup
             await channel.ShutdownAsync();
@@ -490,7 +475,7 @@ namespace PluginCassandraTest.Plugin
             var channel = new Channel($"localhost:{port}", ChannelCredentials.Insecure);
             var client = new Publisher.PublisherClient(channel);
 
-            var schema = GetTestSchema("`classicmodels`.`customers`", "classicmodels.customers");
+            var schema = GetTestSchema("\"tks\".\"posts\"", "tks.posts");
 
             var connectRequest = GetConnectSettings();
 
@@ -525,7 +510,7 @@ namespace PluginCassandraTest.Plugin
             }
 
             // assert
-            Assert.Equal(10, records.Count);
+            Assert.Equal(3, records.Count);
 
             // cleanup
             await channel.ShutdownAsync();
@@ -705,7 +690,8 @@ namespace PluginCassandraTest.Plugin
                 {
                     DataJson = JsonConvert.SerializeObject(new ConfigureWriteFormData
                     {
-                        StoredProcedure = "`test`.`UpsertIntoTestTable`"
+                        // StoredProcedure = "`test`.`UpsertIntoTestTable`"
+                        StoredProcedure = "`tks`.`posts`"
                     })
                 }
             };
@@ -718,7 +704,7 @@ namespace PluginCassandraTest.Plugin
                         Action = Record.Types.Action.Upsert,
                         CorrelationId = "test",
                         RecordId = "record1",
-                        DataJson = "{\"id\":\"1\",\"name\":\"Test First\"}",
+                        DataJson = $"{{\"userid\":\"pg\",\"blog_title\":\"Test First\", \"posted_at\" : \"{DateTime.Now.ToString()}\"}}",
                     }
                 }
             };
@@ -728,11 +714,13 @@ namespace PluginCassandraTest.Plugin
             // act
             client.Connect(connectRequest);
 
-            var configureResponse = client.ConfigureWrite(configureRequest);
-
+            var schema = GetTestSchema("\"tks\".\"posts\"", "tks.posts");
+            //var configureResponse = client.ConfigureWrite(configureRequest);
+            
             var prepareWriteRequest = new PrepareWriteRequest()
             {
-                Schema = configureResponse.Schema,
+                //Schema = configureResponse.Schema,
+                Schema = schema,
                 CommitSlaSeconds = 1000,
                 DataVersions = new DataVersions
                 {

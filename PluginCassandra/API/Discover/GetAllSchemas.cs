@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,110 +9,104 @@ namespace PluginCassandra.API.Discover
 {
     public static partial class Discover
     {
-        private const string TableName = "TABLE_NAME";
-        private const string TableSchema = "TABLE_SCHEMA";
-        private const string TableType = "TABLE_TYPE";
-        private const string ColumnName = "COLUMN_NAME";
-        private const string DataType = "DATA_TYPE";
-        private const string ColumnKey = "COLUMN_KEY";
-        private const string IsNullable = "IS_NULLABLE";
-        private const string CharacterMaxLength = "CHARACTER_MAXIMUM_LENGTH";
+        private const string TableName = "table_name";
+        private const string TableSchema = "keyspace_name";
+        //private const string TableType = "TABLE_TYPE";
+        private const string ColumnName = "column_name";
+        private const string DataType = "type";
+        private const string ColumnKey = "kind";
+        // private const string IsNullable = "IS_NULLABLE";
+        // private const string CharacterMaxLength = "CHARACTER_MAXIMUM_LENGTH";
 
+
+        
         private const string GetAllTablesAndColumnsQuery = @"
-SELECT t.TABLE_NAME
-     , t.TABLE_SCHEMA
-     , t.TABLE_TYPE
-     , c.COLUMN_NAME
-     , c.DATA_TYPE
-     , c.COLUMN_KEY
-     , c.IS_NULLABLE
-     , c.CHARACTER_MAXIMUM_LENGTH
+SELECT keyspace_name, 
+       table_name, 
+       column_name, 
+       type, 
+       kind
+FROM system_schema.columns";
 
-FROM INFORMATION_SCHEMA.TABLES AS t
-      INNER JOIN INFORMATION_SCHEMA.COLUMNS AS c ON c.TABLE_SCHEMA = t.TABLE_SCHEMA AND c.TABLE_NAME = t.TABLE_NAME
-
-WHERE t.TABLE_SCHEMA NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')
-
-ORDER BY t.TABLE_NAME";
-
-        public static async IAsyncEnumerable<Schema> GetAllSchemas(IConnectionFactory connFactory, int sampleSize = 5)
+        public static async IAsyncEnumerable<Schema> GetAllSchemas(ISessionFactory sessionFactory, int sampleSize = 5)
         {
-            var conn = connFactory.GetConnection();
 
-            try
+            var session = sessionFactory.GetSession();
+
+
+            var rows = await session.Execute(GetAllTablesAndColumnsQuery);
+
+            //var data = new List<string> { };
+
+            Schema schema = null;
+            var currentSchemaId = "";
+
+            // foreach (var datum in rows.First())
+            // {
+            //     data.Add(datum?.ToString());
+            // }
+
+            foreach (var row in rows)
             {
-                await conn.OpenAsync();
-
-                var cmd = connFactory.GetCommand(GetAllTablesAndColumnsQuery, conn);
-                var reader = await cmd.ExecuteReaderAsync();
-
-                Schema schema = null;
-                var currentSchemaId = "";
-                while (await reader.ReadAsync())
+                //keyspace.table
+                var schemaId = $"\"{row[0]}\".\"{row[1]}\"";
+                
+                if (schemaId != currentSchemaId)
                 {
-                    var schemaId =
-                        $"{Utility.Utility.GetSafeName(reader.GetValueById(TableSchema).ToString(), '`')}.{Utility.Utility.GetSafeName(reader.GetValueById(TableName).ToString(), '`')}";
-                    if (schemaId != currentSchemaId)
+                    //return previous schema
+                    if (schema != null)
                     {
-                        // return previous schema
-                        if (schema != null)
-                        {
-                            // get sample and count
-                            yield return await AddSampleAndCount(connFactory, schema, sampleSize);
-                        }
-
-                        // start new schema
-                        currentSchemaId = schemaId;
-                        var parts = DecomposeSafeName(currentSchemaId).TrimEscape();
-                        schema = new Schema
-                        {
-                            Id = currentSchemaId,
-                            Name = $"{parts.Schema}.{parts.Table}",
-                            Properties = { },
-                            DataFlowDirection = Schema.Types.DataFlowDirection.Read
-                        };
+                        // get sample and count
+                        yield return await AddSampleAndCount(sessionFactory, schema, sampleSize);
                     }
 
-                    // add column to schema
-                    var property = new Property
+                    // start new schema
+                    currentSchemaId = schemaId;
+                    var parts = DecomposeSafeName(currentSchemaId).TrimEscape();
+                    schema = new Schema
                     {
-                        Id = $"`{reader.GetValueById(ColumnName)}`",
-                        Name = reader.GetValueById(ColumnName).ToString(),
-                        IsKey = reader.GetValueById(ColumnKey).ToString() == "PRI",
-                        IsNullable = reader.GetValueById(IsNullable).ToString() == "YES",
-                        Type = GetType(reader.GetValueById(DataType).ToString()),
-                        TypeAtSource = GetTypeAtSource(reader.GetValueById(DataType).ToString(),
-                            reader.GetValueById(CharacterMaxLength))
+                        Id = currentSchemaId,
+                        Name = $"{parts.Schema}.{parts.Table}",
+                        Properties = { },
+                        DataFlowDirection = Schema.Types.DataFlowDirection.Read
                     };
-                    schema?.Properties.Add(property);
                 }
-
-                if (schema != null)
+                
+                var property = new Property
                 {
-                    // get sample and count
-                    yield return await AddSampleAndCount(connFactory, schema, sampleSize);
-                }
+                    Id = row[2].ToString(),
+                    Name = row[2].ToString(),
+                    IsKey = (row[4].ToString() == "partition_key" || row[4].ToString() == "clustering"),
+                    IsNullable = !(row[4].ToString() == "partition_key" || row[4].ToString() == "clustering"),
+                    Type = GetType(row[3].ToString()),
+                    TypeAtSource = row[3].ToString(),
+                    //    reader.GetValueById(CharacterMaxLength))
+                };
+                schema?.Properties.Add(property);
+                
             }
-            finally
+            
+            if (schema != null)
             {
-                await conn.CloseAsync();
+                // get sample and count
+                yield return await AddSampleAndCount(sessionFactory, schema, sampleSize);
             }
         }
-
-        private static async Task<Schema> AddSampleAndCount(IConnectionFactory connFactory, Schema schema,
+        
+        private static async Task<Schema> AddSampleAndCount(ISessionFactory sessionFactory, Schema schema,
             int sampleSize)
         {
             // add sample and count
-            var records = Read.Read.ReadRecords(connFactory, schema).Take(sampleSize);
+            var records = Read.Read.ReadRecords(sessionFactory, schema).Take(sampleSize);
             schema.Sample.AddRange(await records.ToListAsync());
-            schema.Count = await GetCountOfRecords(connFactory, schema);
+            schema.Count = await GetCountOfRecords(sessionFactory, schema);
 
             return schema;
         }
 
         public static PropertyType GetType(string dataType)
         {
-            switch (dataType)
+            switch (dataType.ToLower())
             {
                 case "datetime":
                 case "timestamp":

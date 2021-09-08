@@ -21,31 +21,31 @@ namespace PluginCassandra.API.Utility
             new ReplicationColumn
             {
                 ColumnName = ReplicationMetaDataJobId,
-                DataType = "varchar(255)",
+                DataType = "varchar",
                 PrimaryKey = true
             },
             new ReplicationColumn
             {
                 ColumnName = ReplicationMetaDataRequest,
                 PrimaryKey = false,
-                DataType = "longtext"
+                DataType = "text"
             },
             new ReplicationColumn
             {
                 ColumnName = ReplicationMetaDataReplicatedShapeId,
-                DataType = "varchar(255)",
+                DataType = "varchar",
                 PrimaryKey = false
             },
             new ReplicationColumn
             {
                 ColumnName = ReplicationMetaDataReplicatedShapeName,
-                DataType = "longtext",
+                DataType = "text",
                 PrimaryKey = false
             },
             new ReplicationColumn
             {
                 ColumnName = ReplicationMetaDataTimestamp,
-                DataType = "varchar(255)",
+                DataType = "varchar",
                 PrimaryKey = false
             }
         };

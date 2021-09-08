@@ -12,13 +12,13 @@ namespace PluginCassandra.API.Replication
             goldenTable.Columns.Add(new ReplicationColumn
             {
                 ColumnName = Constants.ReplicationRecordId,
-                DataType = "varchar(255)",
+                DataType = "varchar",
                 PrimaryKey = true
             });
             goldenTable.Columns.Add(new ReplicationColumn
             {
                 ColumnName = Constants.ReplicationVersionIds,
-                DataType = "longtext",
+                DataType = "text",
                 PrimaryKey = false,
                 Serialize = true
             });

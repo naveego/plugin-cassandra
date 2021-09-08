@@ -6,7 +6,7 @@ namespace PluginCassandra.API.Replication
 {
     public static partial class Replication
     {
-        public static async Task CreateTableAsync(IConnectionFactory connFactory, ReplicationTable table)
+        public static async Task CreateTableAsync(ISessionFactory connFactory, ReplicationTable table)
         {
             
         }

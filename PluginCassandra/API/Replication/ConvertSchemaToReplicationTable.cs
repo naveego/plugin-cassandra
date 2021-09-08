@@ -36,11 +36,11 @@ namespace PluginCassandra.API.Replication
             switch (dataType)
             {
                 case PropertyType.Datetime:
-                    return "varchar(255)";
+                    return "varchar";
                 case PropertyType.Date:
-                    return "varchar(255)";
+                    return "varchar";
                 case PropertyType.Time:
-                    return "varchar(255)";
+                    return "varchar";
                 case PropertyType.Integer:
                     return "int";
                 case PropertyType.Decimal:
@@ -50,13 +50,13 @@ namespace PluginCassandra.API.Replication
                 case PropertyType.Bool:
                     return "boolean";
                 case PropertyType.Blob:
-                    return "longblob";
+                    return "blob";
                 case PropertyType.String:
-                    return "varchar(255)";
+                    return "varchar";
                 case PropertyType.Text:
-                    return "longtext";
+                    return "text";
                 default:
-                    return "longtext";
+                    return "text";
             }
         }
     }

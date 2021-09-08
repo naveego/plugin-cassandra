@@ -7,28 +7,25 @@ namespace PluginCassandra.API.Discover
 {
     public static partial class Discover
     {
-        public static async Task<Count> GetCountOfRecords(IConnectionFactory connFactory, Schema schema)
+        public static async Task<Count> GetCountOfRecords(ISessionFactory sessionFactory, Schema schema)
         {
-            var query = schema.Query;
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                query = $"SELECT * FROM {schema.Id}";
-            }
-
-            var conn = connFactory.GetConnection();
+            //var conn = connFactory.GetConnection();
+            var session = sessionFactory.GetSession();
             
             try
             {
-                await conn.OpenAsync();
-
-                var cmd = connFactory.GetCommand($"SELECT COUNT(*) as count FROM ({query}) as q", conn);
-                var reader = await cmd.ExecuteReaderAsync();
-
+                var rows = await session.Execute($"SELECT COUNT(*) FROM {schema.Id}");
+                
                 var count = -1;
-                while (await reader.ReadAsync())
+
+                foreach (var row in rows)
                 {
-                    count = Convert.ToInt32(reader.GetValueById("count"));
+                    count = Int32.Parse(row["count"].ToString());
                 }
+                // while (await reader.ReadAsync())
+                // {
+                //     count = Convert.ToInt32(reader.GetValueById("count"));
+                // }
                 
                 return count == -1
                     ? new Count
@@ -41,9 +38,15 @@ namespace PluginCassandra.API.Discover
                         Value = count
                     };
             }
-            finally
+            catch(Exception e)
             {
-                await conn.CloseAsync();
+                var debug = e.Message;
+
+                return new Count
+                {
+                    Kind = Count.Types.Kind.Unavailable,
+                };
+                //noop
             }
         }
     }

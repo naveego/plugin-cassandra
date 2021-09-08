@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Cassandra;
 using Grpc.Core;
-using Naveego.Sdk.Logging;
 using Naveego.Sdk.Plugins;
 using Newtonsoft.Json;
 using PluginCassandra.API.Discover;
@@ -14,6 +14,7 @@ using PluginCassandra.API.Replication;
 using PluginCassandra.API.Write;
 using PluginCassandra.DataContracts;
 using PluginCassandra.Helper;
+using Logger = Naveego.Sdk.Logging.Logger;
 
 namespace PluginCassandra.Plugin
 {
@@ -21,11 +22,11 @@ namespace PluginCassandra.Plugin
     {
         private readonly ServerStatus _server;
         private TaskCompletionSource<bool> _tcs;
-        private IConnectionFactory _connectionFactory;
+        private ISessionFactory _sessionFactory;
 
-        public Plugin(IConnectionFactory connectionFactory = null)
+        public Plugin(ISessionFactory sessionFactory = null)
         {
-            _connectionFactory = connectionFactory ?? new ConnectionFactory();
+            _sessionFactory = sessionFactory ?? new SessionFactory();
             _server = new ServerStatus
             {
                 Connected = false,
@@ -59,7 +60,7 @@ namespace PluginCassandra.Plugin
         }
 
         /// <summary>
-        /// Establishes a connection with MySQL.
+        /// Establishes a connection with Cassandra.
         /// </summary>
         /// <param name="request"></param>
         /// <param name="context"></param>
@@ -68,6 +69,7 @@ namespace PluginCassandra.Plugin
         {
             Logger.SetLogPrefix("connect");
             // validate settings passed in
+            
             try
             {
                 _server.Settings = JsonConvert.DeserializeObject<Settings>(request.SettingsJson);
@@ -89,7 +91,7 @@ namespace PluginCassandra.Plugin
             // initialize connection factory
             try
             {
-                _connectionFactory.Initialize(_server.Settings);
+                _sessionFactory.Initialize(_server.Settings);
             }
             catch (Exception e)
             {
@@ -105,21 +107,14 @@ namespace PluginCassandra.Plugin
             }
 
             // test cluster factory
-            var conn = _connectionFactory.GetConnection();
+            //var conn = _sessionFactory.GetConnection();
+            var session = Cluster.Builder()
+                .AddContactPoint(_server.Settings.Hostname).WithPort(Int32.Parse(_server.Settings.Port))
+                .WithCredentials(_server.Settings.Username, _server.Settings.Password)
+                .Build();
             try
             {
-                await conn.OpenAsync();
-
-                if (!await conn.PingAsync())
-                {
-                    return new ConnectResponse
-                    {
-                        OauthStateJson = request.OauthStateJson,
-                        ConnectionError = "Unable to ping target database.",
-                        OauthError = "",
-                        SettingsError = ""
-                    };
-                }
+                    session.Connect();
             }
             catch (Exception e)
             {
@@ -135,8 +130,40 @@ namespace PluginCassandra.Plugin
             }
             finally
             {
-                await conn.CloseAsync();
+                await session.ShutdownAsync();
             }
+            
+            // try
+            // {
+            //     await conn.OpenAsync();
+            //
+            //     if (!await conn.PingAsync())
+            //     {
+            //         return new ConnectResponse
+            //         {
+            //             OauthStateJson = request.OauthStateJson,
+            //             ConnectionError = "Unable to ping target database.",
+            //             OauthError = "",
+            //             SettingsError = ""
+            //         };
+            //     }
+            // }
+            // catch (Exception e)
+            // {
+            //     Logger.Error(e, e.Message, context);
+            //
+            //     return new ConnectResponse
+            //     {
+            //         OauthStateJson = request.OauthStateJson,
+            //         ConnectionError = e.Message,
+            //         OauthError = "",
+            //         SettingsError = ""
+            //     };
+            // }
+            // finally
+            // {
+            //     await conn.CloseAsync();
+            // }
 
             _server.Connected = true;
             
@@ -193,7 +220,7 @@ namespace PluginCassandra.Plugin
                 // get all schemas
                 try
                 {
-                    var schemas = Discover.GetAllSchemas(_connectionFactory, sampleSize);
+                    var schemas = Discover.GetAllSchemas(_sessionFactory, sampleSize);
 
                     discoverSchemasResponse.Schemas.AddRange(await schemas.ToListAsync());
 
@@ -214,7 +241,7 @@ namespace PluginCassandra.Plugin
 
                 Logger.Info($"Refresh schemas attempted: {refreshSchemas.Count}");
 
-                var schemas = Discover.GetRefreshSchemas(_connectionFactory, refreshSchemas, sampleSize);
+                var schemas = Discover.GetRefreshSchemas(_sessionFactory, refreshSchemas, sampleSize);
 
                 discoverSchemasResponse.Schemas.AddRange(await schemas.ToListAsync());
 
@@ -249,7 +276,7 @@ namespace PluginCassandra.Plugin
             
                 Logger.SetLogPrefix(jobId);
             
-                var records = Read.ReadRecords(_connectionFactory, schema);
+                var records = Read.ReadRecords(_sessionFactory, schema);
 
                 await foreach (var record in records)
                 {
@@ -283,7 +310,7 @@ namespace PluginCassandra.Plugin
         {
             Logger.Info("Configuring write...");
 
-            var storedProcedures = await Write.GetAllStoredProceduresAsync(_connectionFactory);
+            var storedProcedures = await Write.GetAllStoredProceduresAsync(_sessionFactory);
 
             var schemaJson = Write.GetSchemaJson(storedProcedures);
             var uiJson = Write.GetUIJson();
@@ -313,7 +340,7 @@ namespace PluginCassandra.Plugin
                 var storedProcedure = storedProcedures.Find(s => s.GetId() == formData.StoredProcedure);
 
                 // base schema to return
-                var schema = await Write.GetSchemaForStoredProcedureAsync(_connectionFactory, storedProcedure);
+                var schema = await Write.GetSchemaForStoredProcedureAsync(_sessionFactory, storedProcedure);
 
                 return new ConfigureWriteResponse
                 {
@@ -347,7 +374,7 @@ namespace PluginCassandra.Plugin
         }
 
         /// <summary>
-        /// Configures replication writebacks to MySQL
+        /// Configures replication writebacks to Cassandra
         /// </summary>
         /// <param name="request"></param>
         /// <param name="context"></param>
@@ -402,7 +429,7 @@ namespace PluginCassandra.Plugin
         }
 
         /// <summary>
-        /// Prepares writeback settings to write to MySQL
+        /// Prepares writeback settings to write to Cassandra CQL3
         /// </summary>
         /// <param name="request"></param>
         /// <param name="context"></param>
@@ -428,7 +455,7 @@ namespace PluginCassandra.Plugin
                 Logger.Info($"Starting to reconcile Replication Job {request.DataVersions.JobId}");
                 try
                 {
-                    await Replication.ReconcileReplicationJobAsync(_connectionFactory, request);
+                    await Replication.ReconcileReplicationJobAsync(_sessionFactory, request);
                 }
                 catch (Exception e)
                 {
@@ -447,7 +474,7 @@ namespace PluginCassandra.Plugin
         }
 
         /// <summary>
-        /// Writes records to MySQL
+        /// Writes records to Cassandra
         /// </summary>
         /// <param name="requestStream"></param>
         /// <param name="responseStream"></param>
@@ -458,7 +485,7 @@ namespace PluginCassandra.Plugin
         {
             try
             {
-                Logger.Info("Writing records to MySQL...");
+                Logger.Info("Writing records to Cassandra...");
             
                 var schema = _server.WriteSettings.Schema;
                 var inCount = 0;
@@ -481,7 +508,7 @@ namespace PluginCassandra.Plugin
                         // send record to source system
                         // add await for unit testing 
                         // removed to allow multiple to run at the same time
-                        Task.Run(async () => await Replication.WriteRecord(_connectionFactory, schema, record, config, responseStream), context.CancellationToken);
+                        Task.Run(async () => await Replication.WriteRecord(_sessionFactory, schema, record, config, responseStream), context.CancellationToken);
                     }
                     else
                     {
@@ -489,12 +516,12 @@ namespace PluginCassandra.Plugin
                         // add await for unit testing 
                         // removed to allow multiple to run at the same time
                         Task.Run(async () =>
-                                await Write.WriteRecordAsync(_connectionFactory, schema, record, responseStream),
+                                await Write.WriteRecordAsync(_sessionFactory, schema, record, responseStream),
                             context.CancellationToken);
                     }
                 }
             
-                Logger.Info($"Wrote {inCount} records to MySQL.");
+                Logger.Info($"Wrote {inCount} records to Cassandra.");
             }
             catch (Exception e)
             {

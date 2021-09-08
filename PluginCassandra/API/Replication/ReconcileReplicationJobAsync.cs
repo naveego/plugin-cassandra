@@ -18,7 +18,7 @@ namespace PluginCassandra.API.Replication
         private const string JobDataVersionChange = "Job data version changed";
         private const string ShapeDataVersionChange = "Shape data version changed";
         
-        public static async Task ReconcileReplicationJobAsync(IConnectionFactory connFactory, PrepareWriteRequest request)
+        public static async Task ReconcileReplicationJobAsync(ISessionFactory sessionFactory, PrepareWriteRequest request)
         {
             // get request settings 
             var replicationSettings =
@@ -44,7 +44,7 @@ namespace PluginCassandra.API.Replication
 
             // get previous metadata
             Logger.Info($"Getting previous metadata job: {request.DataVersions.JobId}");
-            var previousMetaData = await GetPreviousReplicationMetaDataAsync(connFactory, request.DataVersions.JobId, metaDataTable);
+            var previousMetaData = await GetPreviousReplicationMetaDataAsync(sessionFactory, request.DataVersions.JobId, metaDataTable);
             Logger.Info($"Got previous metadata job: {request.DataVersions.JobId}");
 
             // create current metadata
@@ -62,8 +62,8 @@ namespace PluginCassandra.API.Replication
             if (previousMetaData == null)
             {
                 Logger.Info($"No Previous metadata creating tables job: {request.DataVersions.JobId}");
-                await EnsureTableAsync(connFactory, goldenTable);
-                await EnsureTableAsync(connFactory, versionTable);
+                await EnsureTableAsync(sessionFactory, goldenTable);
+                await EnsureTableAsync(sessionFactory, versionTable);
                 Logger.Info($"Created tables job: {request.DataVersions.JobId}");
             }
             else
@@ -116,24 +116,24 @@ namespace PluginCassandra.API.Replication
                 if (dropGoldenReason != "")
                 {
                     Logger.Info($"Dropping golden table: {dropGoldenReason}");
-                    await DropTableAsync(connFactory, previousGoldenTable);
+                    await DropTableAsync(sessionFactory, previousGoldenTable);
 
-                    await EnsureTableAsync(connFactory, goldenTable);
+                    await EnsureTableAsync(sessionFactory, goldenTable);
                 }
 
                 // drop previous version table
                 if (dropVersionReason != "")
                 {
                     Logger.Info($"Dropping version table: {dropVersionReason}");
-                    await DropTableAsync(connFactory, previousVersionTable);
+                    await DropTableAsync(sessionFactory, previousVersionTable);
 
-                    await EnsureTableAsync(connFactory, versionTable);
+                    await EnsureTableAsync(sessionFactory, versionTable);
                 }
             }
 
             // save new metadata
             Logger.Info($"Updating metadata job: {request.DataVersions.JobId}");
-            await UpsertReplicationMetaDataAsync(connFactory, metaDataTable, metaData);
+            await UpsertReplicationMetaDataAsync(sessionFactory, metaDataTable, metaData);
             Logger.Info($"Updated metadata job: {request.DataVersions.JobId}");
         }
     }

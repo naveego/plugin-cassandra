@@ -14,7 +14,6 @@ namespace PluginCassandraTest.Helper
             {
                 Hostname = "123.456.789.0",
                 Port = "3306",
-                Database = "testdb",
                 Username = "username",
                 Password = "password"
             };
@@ -32,7 +31,7 @@ namespace PluginCassandraTest.Helper
             var settings = new Settings
             {
                 Hostname = null,
-                Database = "testdb",
+                Port = "3306",
                 Username = "username",
                 Password = "password"
             };
@@ -51,7 +50,7 @@ namespace PluginCassandraTest.Helper
             var settings = new Settings
             {
                 Hostname = "123.456.789.0",
-                Database = null,
+                Port = "3306",
                 Username = "username",
                 Password = "password"
             };
@@ -70,7 +69,7 @@ namespace PluginCassandraTest.Helper
             var settings = new Settings
             {
                 Hostname = "123.456.789.0",
-                Database = "testdb",
+                Port = "3306",
                 Username = null,
                 Password = "password"
             };
@@ -89,7 +88,7 @@ namespace PluginCassandraTest.Helper
             var settings = new Settings
             {
                 Hostname = "123.456.789.0",
-                Database = "testdb",
+                Port = "3306",
                 Username = "username",
                 Password = null
             };
@@ -109,7 +108,6 @@ namespace PluginCassandraTest.Helper
             {
                 Hostname = "123.456.789.0",
                 Port = "3306",
-                Database = "testdb",
                 Username = "username",
                 Password = "password"
             };

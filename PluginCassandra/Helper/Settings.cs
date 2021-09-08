@@ -1,4 +1,5 @@
 using System;
+using Grpc.Core;
 
 namespace PluginCassandra.Helper
 {
@@ -8,7 +9,6 @@ namespace PluginCassandra.Helper
         public string Port { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
-        public string Database { get; set; }
 
         /// <summary>
         /// Validates the settings input object
@@ -16,16 +16,11 @@ namespace PluginCassandra.Helper
         /// <exception cref="Exception"></exception>
         public void Validate()
         {
+            
             if (String.IsNullOrEmpty(Hostname))
             {
                 throw new Exception("The Hostname property must be set");
             }
-            
-            if (String.IsNullOrEmpty(Database))
-            {
-                throw new Exception("The Database property must be set");
-            }
-
             if (String.IsNullOrEmpty(Username))
             {
                 throw new Exception("The Username property must be set");
@@ -43,7 +38,7 @@ namespace PluginCassandra.Helper
         /// <returns></returns>
         public string GetConnectionString()
         {
-            return $"Server={Hostname}; Port={Port}; Database={Database}; User={Username}; Password={Password};";
+            return $"Server={Hostname}; Port={Port}; User={Username}; Password={Password};";
         }
         
         /// <summary>

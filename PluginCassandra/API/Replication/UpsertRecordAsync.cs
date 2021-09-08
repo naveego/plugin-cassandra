@@ -12,23 +12,25 @@ namespace PluginCassandra.API.Replication
 {
     public static partial class Replication
     {
-        public static async Task UpsertRecordAsync(IConnectionFactory connFactory,
+        public static async Task UpsertRecordAsync(ISessionFactory sessionFactory,
             ReplicationTable table,
             Dictionary<string, object> recordMap)
         {
-            var conn = connFactory.GetConnection();
+            // var conn = connFactory.GetConnection();
+
+            var session = sessionFactory.GetSession();
             
             try
             {
-                await conn.OpenAsync();
+                //await conn.OpenAsync();
                 
                 // try to insert
                 var querySb =
                     new StringBuilder(
-                        $"INSERT INTO {Utility.Utility.GetSafeName(table.SchemaName, '`')}.{Utility.Utility.GetSafeName(table.TableName, '`')}(");
+                        $"INSERT INTO {Utility.Utility.GetSafeName(table.SchemaName, '"')}.{Utility.Utility.GetSafeName(table.TableName, '"')}(");
                 foreach (var column in table.Columns)
                 {
-                    querySb.Append($"{Utility.Utility.GetSafeName(column.ColumnName, '`')},");
+                    querySb.Append($"{Utility.Utility.GetSafeName(column.ColumnName, '"')},");
                 }
 
                 querySb.Length--;
@@ -44,9 +46,26 @@ namespace PluginCassandra.API.Replication
                             rawValue = JsonConvert.SerializeObject(rawValue);
                         }
 
-                        querySb.Append(rawValue != null
-                            ? $"'{Utility.Utility.GetSafeString(rawValue.ToString(), "'", "''")}',"
-                            : $"NULL,");
+                        switch (column.DataType)
+                        {
+                            case("bigint"):
+                            case("smallint"):
+                            case("varint"):
+                            case("int"):
+                            case("decimal"):
+                            case("float"):
+                            case("counter"):
+                                querySb.Append(rawValue != null
+                                    ? $"{Utility.Utility.GetSafeString(rawValue.ToString())},"
+                                    : $"NULL,");
+                                break;
+                            default:
+                                querySb.Append(rawValue != null
+                                    ? $"'{Utility.Utility.GetSafeString(rawValue.ToString(), "\"")}',"
+                                    : $"NULL,");
+                                break;
+                        }
+                        
                     }
                     else
                     {
@@ -61,9 +80,13 @@ namespace PluginCassandra.API.Replication
 
                 Logger.Debug($"Insert record query: {query}");
 
-                var cmd = connFactory.GetCommand(query, conn);
+                // var cmd = connFactory.GetCommand(query, conn);
+                //
+                // await cmd.ExecuteNonQueryAsync();
 
-                await cmd.ExecuteNonQueryAsync();
+                await session.Execute(query);
+
+
             }
             catch (Exception e)
             {
@@ -72,7 +95,7 @@ namespace PluginCassandra.API.Replication
                     // update if it failed
                     var querySb =
                         new StringBuilder(
-                            $"UPDATE {Utility.Utility.GetSafeName(table.SchemaName, '`')}.{Utility.Utility.GetSafeName(table.TableName, '`')} SET ");
+                            $"UPDATE {Utility.Utility.GetSafeName(table.SchemaName, '"')}.{Utility.Utility.GetSafeName(table.TableName, '"')} SET ");
                     foreach (var column in table.Columns)
                     {
                         if (!column.PrimaryKey)
@@ -88,16 +111,16 @@ namespace PluginCassandra.API.Replication
                                 if (rawValue != null)
                                 {
                                     querySb.Append(
-                                        $"{Utility.Utility.GetSafeName(column.ColumnName, '`')}='{Utility.Utility.GetSafeString(rawValue.ToString(), "'", "''")}',");
+                                        $"{Utility.Utility.GetSafeName(column.ColumnName, '"')}='{Utility.Utility.GetSafeString(rawValue.ToString(), "'", "''")}',");
                                 }
                                 else
                                 {
-                                    querySb.Append($"{Utility.Utility.GetSafeName(column.ColumnName, '`')}=NULL,");
+                                    querySb.Append($"{Utility.Utility.GetSafeName(column.ColumnName, '"')}=NULL,");
                                 }
                             }
                             else
                             {
-                                querySb.Append($"{Utility.Utility.GetSafeName(column.ColumnName, '`')}=NULL,");
+                                querySb.Append($"{Utility.Utility.GetSafeName(column.ColumnName, '"')}=NULL,");
                             }
                         }
                     }
@@ -115,9 +138,11 @@ namespace PluginCassandra.API.Replication
 
                     var query = querySb.ToString();
 
-                    var cmd = connFactory.GetCommand(query, conn);
+                    await session.Execute(query);
 
-                    await cmd.ExecuteNonQueryAsync();
+                    // var cmd = connFactory.GetCommand(query, conn);
+                    //
+                    // await cmd.ExecuteNonQueryAsync();
                 }
                 catch (Exception exception)
                 {
@@ -125,15 +150,9 @@ namespace PluginCassandra.API.Replication
                     Logger.Error(exception, $"Error Update: {exception.Message}");
                     throw;
                 }
-                finally
-                {
-                    await conn.CloseAsync();
-                }
+                
             }
-            finally
-            {
-                await conn.CloseAsync();
-            }
+            
         }
     }
 }

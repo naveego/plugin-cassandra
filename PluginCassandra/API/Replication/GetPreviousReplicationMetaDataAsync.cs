@@ -15,46 +15,38 @@ namespace PluginCassandra.API.Replication
         private static readonly string GetMetaDataQuery = @"SELECT * FROM {0}.{1} WHERE {2} = '{3}'";
 
         public static async Task<ReplicationMetaData> GetPreviousReplicationMetaDataAsync(
-            IConnectionFactory connFactory,
+            ISessionFactory sessionFactory,
             string jobId,
             ReplicationTable table)
         {
-            var conn = connFactory.GetConnection();
 
             try
             {
                 ReplicationMetaData replicationMetaData = null;
 
                 // ensure replication metadata table
-                await EnsureTableAsync(connFactory, table);
+                await EnsureTableAsync(sessionFactory, table);
 
                 // check if metadata exists
 
-                await conn.OpenAsync();
+                //await conn.OpenAsync();
 
-                var cmd = connFactory.GetCommand(
-                    string.Format(GetMetaDataQuery,
-                        Utility.Utility.GetSafeName(table.SchemaName, '`'),
-                        Utility.Utility.GetSafeName(table.TableName, '`'),
-                        Utility.Utility.GetSafeName(Constants.ReplicationMetaDataJobId),
-                        jobId),
-                    conn);
-                var reader = await cmd.ExecuteReaderAsync();
+                var session = sessionFactory.GetSession();
 
-                if (reader.HasRows())
+                var rows = await session.Execute(string.Format(GetMetaDataQuery,
+                    Utility.Utility.GetSafeName(table.SchemaName, '"'),
+                    Utility.Utility.GetSafeName(table.TableName, '"'),
+                    Utility.Utility.GetSafeName(Constants.ReplicationMetaDataJobId, '"'),
+                    jobId));
+                
+
+                foreach (var row in rows)
                 {
-                    // metadata exists
-                    await reader.ReadAsync();
-
-                    var request = JsonConvert.DeserializeObject<PrepareWriteRequest>(
-                        reader.GetValueById(Constants.ReplicationMetaDataRequest).ToString());
-                    var shapeName = reader.GetValueById(Constants.ReplicationMetaDataReplicatedShapeName)
-                        .ToString();
-                    var shapeId = reader.GetValueById(Constants.ReplicationMetaDataReplicatedShapeId)
-                        .ToString();
-                    var timestamp = DateTime.Parse(reader.GetValueById(Constants.ReplicationMetaDataTimestamp)
-                        .ToString());
-
+                    var request = JsonConvert.DeserializeObject<PrepareWriteRequest>(row[Constants.ReplicationMetaDataRequest].ToString());
+                    var shapeName = row[Constants.ReplicationMetaDataReplicatedShapeName].ToString();
+                    var shapeId = row[Constants.ReplicationMetaDataReplicatedShapeId].ToString();
+                    var timestamp = DateTime.Parse(row[Constants.ReplicationMetaDataTimestamp].ToString());
+                    
                     replicationMetaData = new ReplicationMetaData
                     {
                         Request = request,
@@ -63,17 +55,12 @@ namespace PluginCassandra.API.Replication
                         Timestamp = timestamp
                     };
                 }
-                
                 return replicationMetaData;
             }
             catch (Exception e)
             {
                 Logger.Error(e, e.Message);
                 throw;
-            }
-            finally
-            {
-                await conn.CloseAsync();
             }
         }
     }
