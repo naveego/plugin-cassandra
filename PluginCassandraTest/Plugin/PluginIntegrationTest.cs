@@ -58,6 +58,12 @@ namespace PluginCassandraTest.Plugin
                         Id = "Name",
                         Name = "Name",
                         Type = PropertyType.String
+                    },
+                    new Property
+                    {
+                        Id = "checking name",
+                        Name = "checking name",
+                        Type = PropertyType.Text
                     }
                 }
             };
@@ -595,9 +601,9 @@ namespace PluginCassandraTest.Plugin
                 {
                     SettingsJson = JsonConvert.SerializeObject(new ConfigureReplicationFormData
                     {
-                        SchemaName = "test",
-                        GoldenTableName = "gr_test",
-                        VersionTableName = "vr_test"
+                        SchemaName = "wyatt",
+                        GoldenTableName = "wyatt_gr",
+                        VersionTableName = "wyatt_vr"
                     })
                 },
                 DataVersions = new DataVersions
