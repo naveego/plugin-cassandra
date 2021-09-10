@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,15 +43,24 @@ AND table_name = '{1}'";
 {Utility.Utility.GetSafeName(table.SchemaName, '"')}.{Utility.Utility.GetSafeName(table.TableName, '"')}(");
                     var primaryKeySb = new StringBuilder("(");
                     var hasPrimaryKey = false;
+                    //get all tables which are pk, put them together like a normal cassandra upload
+                    var pkColumnList = new List<string> { };
                     foreach (var column in table.Columns)
                     {
                         querySb.Append(
-                            $"{Utility.Utility.GetSafeName(column.ColumnName)} {column.DataType}{(column.PrimaryKey ? " PRIMARY KEY" : "")},");
+                            // $"{Utility.Utility.GetSafeName(column.ColumnName)} {column.DataType}{(column.PrimaryKey ? " PRIMARY KEY" : "")},");
+                            $"{Utility.Utility.GetSafeName(column.ColumnName)} {column.DataType},");
                         if (column.PrimaryKey)
                         {
-                            primaryKeySb.Append($"{Utility.Utility.GetSafeName(column.ColumnName)},");
+                            pkColumnList.Add(column.ColumnName);
+                            // primaryKeySb.Append($"{Utility.Utility.GetSafeName(column.ColumnName)},");
                             hasPrimaryKey = true;
                         }
+                    }
+
+                    if (pkColumnList.Count > 0)
+                    {
+                        querySb.Append($"PRIMARY KEY (\"{string.Join("\",\"", pkColumnList)}\"),");
                     }
 
                     querySb.Length--;

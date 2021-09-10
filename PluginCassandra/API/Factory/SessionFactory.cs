@@ -18,15 +18,5 @@ namespace PluginCassandra.API.Factory
             return new Session(_settings);
         }
         
-        
-        // public IConnection GetConnection(string database)
-        // {
-        //     return new Connection(_settings, database);
-        // }
-
-        // public ICommand GetCommand(string commandText, ISession session)
-        // {
-        //     return new Command(commandText, session);
-        // }
     }
 }
